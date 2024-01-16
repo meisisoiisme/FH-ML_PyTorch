@@ -56,7 +56,7 @@ class CNN(nn.Module):
         return x
 
 # Parameters
-num_samples = 1000
+num_samples = 100
 num_classes = 6
 image_size = 64
 batch_size = 32
