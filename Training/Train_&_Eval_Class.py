@@ -116,8 +116,10 @@ class CustomTrainer:
             if stop_condition(epoch, avg_val_loss):
                 print(f'Early stopping at epoch {epoch+1}')
                 break
-
+   
+    
     def train_with_mixup_augmentation(self, alpha=0.2):
+        # Implementation of the mixup augmentation training strategy
         for epoch in range(self.num_epochs):
             self.model.train()
 
@@ -136,24 +138,12 @@ class CustomTrainer:
                 self.optimizer.step()
 
             self.model.eval()
-            val_loss = 0.0
-            correct = 0
-            total = 0
+            validation_loss, accuracy = self.run_validation_epoch()
 
-            with torch.no_grad():
-                for inputs, labels, landmarks in self.val_loader:
-                    inputs, labels, landmarks = inputs.to(self.device), labels.to(self.device), landmarks.to(self.device)
-                    outputs = self.model(inputs)
-                    loss = self.criterion(outputs, labels)
-                    val_loss += loss.item()
-
-                    _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
-
-            print(f'Epoch {epoch+1}/{self.num_epochs}, Loss: {val_loss/len(self.val_loader)}, Validation Accuracy: {correct/total}')
+            print(f'Epoch {epoch+1}/{self.num_epochs}, Loss: {validation_loss}, Validation Accuracy: {accuracy}')
 
     def train_with_transfer_learning(self):
+        # Implementation of the transfer learning training strategy
         for epoch in range(self.num_epochs):
             self.model.train()
 
@@ -168,23 +158,9 @@ class CustomTrainer:
                 self.optimizer.step()
 
             self.model.eval()
-            val_loss = 0.0
-            correct = 0
-            total = 0
+            validation_loss, accuracy = self.run_validation_epoch()
 
-            with torch.no_grad():
-                for inputs, labels, landmarks in self.val_loader:
-                    inputs, labels, landmarks = inputs.to(self.device), labels.to(self.device), landmarks.to(self.device)
-                    features = self.model.features(inputs)
-                    outputs = self.model.classifier(features.view(features.size(0), -1))
-                    loss = self.criterion(outputs, labels)
-                    val_loss += loss.item()
-
-                    _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
-
-            print(f'Epoch {epoch+1}/{self.num_epochs}, Loss: {val_loss/len(self.val_loader)}, Validation Accuracy: {correct/total}')
+            print(f'Epoch {epoch+1}/{self.num_epochs}, Loss: {validation_loss}, Validation Accuracy: {accuracy}')
 
     def train(self, counter, experiment_details=None):
         if counter == 1:
@@ -197,3 +173,81 @@ class CustomTrainer:
 
         if experiment_details:
             self.log_experiment_details(experiment_details)
+
+
+    def run_training_epoch(self):
+        self.model.train()
+        train_loss = 0.0
+
+        for inputs, labels, landmarks in self.train_loader:
+            inputs, labels, landmarks = inputs.to(self.device), labels.to(self.device), landmarks.to(self.device)
+
+            self.optimizer.zero_grad()
+            outputs = self.model(inputs)
+            loss = self.criterion(outputs, labels)
+            loss.backward()
+            self.optimizer.step()
+
+            train_loss += loss.item()
+
+        return train_loss / len(self.train_loader)
+
+    def run_validation_epoch(self):
+        self.model.eval()
+        val_loss = 0.0
+        correct = 0
+        total = 0
+
+        with torch.no_grad():
+            for inputs, labels, landmarks in self.val_loader:
+                inputs, labels, landmarks = inputs.to(self.device), labels.to(self.device), landmarks.to(self.device)
+
+                outputs = self.model(inputs)
+                loss = self.criterion(outputs, labels)
+                val_loss += loss.item()
+
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        validation_loss = val_loss / len(self.val_loader)
+        accuracy = correct / total
+
+        return validation_loss, accuracy
+
+    def initialize_tensorboard_logging(self, log_dir='./logs'):
+        # Initialize TensorBoard logging
+        writer = SummaryWriter(log_dir)
+        return writer
+
+    def save_model(self, save_path='model.pth'):
+        # Save the trained model
+        torch.save(self.model.state_dict(), save_path)
+
+    def load_model(self, model_path='model.pth'):
+        # Load a saved model
+        self.model.load_state_dict(torch.load(model_path))
+        self.model.eval()
+
+    def perform_inference(self, input_data):
+        # Perform inference on new data
+        # Example: outputs = self.model(input_data)
+        # return outputs
+
+    def visualize_training_curves(self):
+        # Visualize training curves (loss and accuracy)
+        plt.figure(figsize=(12, 5))
+        plt.subplot(1, 2, 1)
+        plt.plot(self.history['train_loss'], label='Train Loss')
+        plt.plot(self.history['val_loss'], label='Validation Loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+
+        plt.subplot(1, 2, 2)
+        plt.plot(self.history['accuracy'], label='Validation Accuracy')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.legend()
+
+        plt.show()
