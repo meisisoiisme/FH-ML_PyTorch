@@ -1,6 +1,6 @@
 class Derivate_1_CNN(nn.Module):
     def __init__(self, num_classes, image_size):
-        super(DifferentCNN, self).__init__()
+        super(Derivate_1_CNN, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1),  # Increased initial channels
             nn.ReLU(),
