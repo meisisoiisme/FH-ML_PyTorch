@@ -1,6 +1,6 @@
 class Derivate_1_Net5(nn.Module):
     def __init__(self, num_classes=6):
-        super(DifferentLeNet5, self).__init__()
+        super(Derivate_1_Net5, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 10, kernel_size=5),          # Adjusted initial channels
             nn.ReLU(),
