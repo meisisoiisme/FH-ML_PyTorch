@@ -1,6 +1,6 @@
 class Derivate_1_AlexNet(nn.Module):
     def __init__(self, num_classes=6):
-        super(DifferentAlexNet, self).__init__()
+        super(Derivate_1_AlexNet, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=7, stride=2, padding=3),      # Decreased initial channels
             nn.ReLU(),
