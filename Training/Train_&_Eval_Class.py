@@ -5,7 +5,7 @@ from torch.utils.tensorboard import SummaryWriter
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 
-class CustomTrainer:
+class Train_and_Eval:
     def __init__(self, model, train_loader, val_loader, criterion, optimizer, device, num_epochs=10):
         self.model = model
         self.train_loader = train_loader
