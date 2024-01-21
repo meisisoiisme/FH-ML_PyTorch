@@ -1,6 +1,6 @@
 class Derivate_1_ResNet50(nn.Module):
     def __init__(self, num_classes=6):
-        super(DifferentResNet50, self).__init__()
+        super(Derivate_1_ResNet50, self).__init__()
         self.model = models.resnet50(pretrained=True)
         in_features = self.model.fc.in_features
         self.model.fc = nn.Sequential(
